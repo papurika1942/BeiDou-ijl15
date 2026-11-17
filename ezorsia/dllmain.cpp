@@ -9,6 +9,7 @@
 #include "HpMpAlert.h"
 #include "SelectCharMacFix.h"
 #include "CombatDamage.h"
+#include "fusion_tier.h"
 #pragma comment(lib, "ws2_32.lib")
 
 // config.ini can use IP or hostname (ServerIP_Address=...).
@@ -287,7 +288,14 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 		} else {
 			std::cout << "[combat] damage cave disabled (optional:damageInject=0)" << std::endl;
 		}
+#if FUSION_TIER >= 42
+		// R42: four gameplay byte patches. Physically compiled out below tier 42
+		// so a staged build cannot write them even if a stale config sets them true.
 		ApplyNativePatches(g_banFist, g_strengthenSewer, g_unStopAttack, g_unlockSP);
+		std::cout << "[fusion] TIER=42 native patches armed" << std::endl;
+#else
+		std::cout << "[fusion] TIER=" << FUSION_TIER << " native patches COMPILED OUT" << std::endl;
+#endif
 		HookSelectCharMacFix(true);
 		//Hook_get_unknown(true);
 		//Hook_get_resource_object(true); //helper function hooks  //ty teto for helping me get started
