@@ -42,6 +42,16 @@ public:
 	static DWORD jumpCap;
 	static std::string ServerIP_AddressFromINI;
 	static int serverIP_Port;
+	// R41 baseline merge: [statusbar] / [quickslot] switches. All defaults
+	// reproduce the previous hard-coded behaviour.
+	static int StatusBarX;        // -1 = keep the client's own x
+	static bool MoveBarFrame;     // false = leave the background panel alone
+	static bool MoveBarItems;     // false = leave HP/MP/EXP + chat alone
+	static int ChatBoxX;          // extra x for the chat input
+	static int BackgroundOffsetX; // extra x for the background image only
+	static bool EnableLongSlot;   // false = keep the native 8-slot bar
+	static int QuickSlotX;        // extra x for the whole quick-slot bar
+	static int QuickSlotY;        // extra y for the whole quick-slot bar
 	static bool talkRepeat;
 	static int talkTime;
 };

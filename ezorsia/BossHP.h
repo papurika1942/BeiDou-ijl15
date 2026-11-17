@@ -3,6 +3,9 @@
 class BossHP
 {
 public:
+	// R41 baseline merge: [bosshp] switches. Enabled=false skips every hook.
+	static bool Enabled;
+	static int PercentOffsetY; // y offset of the "%" tooltip (was hard-coded 37)
 	static void Hook();
 private:
 	static char aBossHpUIToolTip[1304];

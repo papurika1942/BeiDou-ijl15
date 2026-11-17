@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "HpMpAlert.h"
+#include "CombatHooks.h"
 namespace {
 constexpr DWORD kSaveGlobalAddr = 0x0049C8E7;
 constexpr DWORD kUIStatusBarPtr = 0x00BEBF9C;
@@ -19,17 +20,7 @@ struct COutPacket {
     unsigned int Offset;
     int EncryptedByShanda;
 };
-struct CInPacket {
-    bool Loopback;
-    int State;
-    void* Data;
-    unsigned long Size;
-    unsigned short RawSeq;
-    unsigned short DataLen;
-    unsigned short Unknown;
-    unsigned int Offset;
-    void* Unk;
-};
+// CInPacket is shared with CombatHooks.h so both dispatchers see one layout.
 using SendPacket_t = void(__fastcall*)(void* pThis, void* edx, COutPacket* packet);
 static SendPacket_t g_SendPacket = reinterpret_cast<SendPacket_t>(0x0049637B);
 static bool TryReadDword(DWORD address, DWORD& out) {
@@ -92,7 +83,7 @@ static void HandleHpMpAlertPacket(CInPacket* packet) {
         return;
     }
     __try {
-        if (packet->Data == nullptr || packet->Size < 8) {
+        if (packet->Data == nullptr || packet->PacketLen < 8) {
             return;
         }
         const unsigned char* data = reinterpret_cast<const unsigned char*>(packet->Data);
@@ -118,6 +109,7 @@ using ProcessPacket_t = void(__fastcall*)(void* pThis, void* edx, CInPacket* pac
 static ProcessPacket_t s_ProcessPacket = reinterpret_cast<ProcessPacket_t>(kProcessPacketAddr);
 static void __fastcall ProcessPacket_Hook(void* pThis, void* edx, CInPacket* packet) {
     HandleHpMpAlertPacket(packet);
+    CombatHooks::DispatchRecvPacket(packet);   // single hook, all combat cases live here
     s_ProcessPacket(pThis, edx, packet);
 }
 } // namespace

@@ -30,6 +30,15 @@ std::string Client::ServerIP_AddressFromINI = "127.0.0.1"; // 服务器IP地址
 int Client::serverIP_Port = 8484; // 服务器端口
 bool Client::talkRepeat = false; // 重复说话
 int Client::talkTime = 2000; // 说话间隔时间
+// R41 baseline merge: [statusbar] / [quickslot]. Defaults = previous behaviour.
+int Client::StatusBarX = -1;
+bool Client::MoveBarFrame = true;
+bool Client::MoveBarItems = true;
+int Client::ChatBoxX = 0;
+int Client::BackgroundOffsetX = 0;
+bool Client::EnableLongSlot = true;
+int Client::QuickSlotX = 0;
+int Client::QuickSlotY = 0;
 
 void Client::UpdateGameStartup() {
 	//Memory::CodeCave(cc0x0044E550, dw0x0044E550, dw0x0044E550Nops); //run from packed client //skip //sub_44E546
@@ -177,6 +186,14 @@ void Client::UpdateGameStartup() {
 
 void Client::UpdateResolution() {
 	nStatusBarY = Client::m_nGameHeight - 578;
+	// R41: push the [statusbar] switches into the three caves. Reading them
+	// here (instead of inside the caves) keeps the asm tiny and means the
+	// values are fixed for the session, matching how the caves are installed.
+	nStatusBarX = Client::StatusBarX;
+	nStatusBarMoveItems = Client::MoveBarItems ? 1 : 0;
+	nStatusBarMoveFrame = Client::MoveBarFrame ? 1 : 0;
+	nStatusBarChatX = Client::ChatBoxX;
+	nStatusBarBgX = Client::BackgroundOffsetX;
 
 	Memory::CodeCave(AdjustStatusBar, dwStatusBarVPos, 5);
 	Memory::CodeCave(AdjustStatusBarBG, dwStatusBarBackgroundVPos, 5);
@@ -203,12 +220,12 @@ void Client::UpdateResolution() {
 	Memory::WriteInt(dwTempStatCoolTimeVPos + 2, (m_nGameHeight / 2) - 23);	//sub ebx,277 ; Skill icon cooltime y-pos
 	Memory::WriteInt(dwTempStatCoolTimeHPos + 3, (m_nGameWidth / 2) - 3);	//lea eax,[eax+esi+397] ; Skill icon cooltime x-pos
 
-	Memory::WriteInt(dwQuickSlotInitVPos + 1, m_nGameHeight + 1);//add eax,533
-	Memory::WriteInt(dwQuickSlotInitHPos + 1, 815); //push 647 //hd800
-	Memory::WriteInt(dwQuickSlotVPos + 2, m_nGameHeight + 1);//add esi,533
-	Memory::WriteInt(dwQuickSlotHPos + 1, 815); //push 647 //hd800
-	Memory::WriteInt(dwQuickSlotCWndVPos + 2, (600 - m_nGameHeight) / 2 - 427 - 20); //lea edi,[eax-427]
-	Memory::WriteInt(dwQuickSlotCWndHPos + 2, -815); //lea ebx,[eax-647]
+	Memory::WriteInt(dwQuickSlotInitVPos + 1, m_nGameHeight + 1 + QuickSlotY);//add eax,533
+	Memory::WriteInt(dwQuickSlotInitHPos + 1, 815 + QuickSlotX); //push 647 //hd800
+	Memory::WriteInt(dwQuickSlotVPos + 2, m_nGameHeight + 1 + QuickSlotY);//add esi,533
+	Memory::WriteInt(dwQuickSlotHPos + 1, 815 + QuickSlotX); //push 647 //hd800
+	Memory::WriteInt(dwQuickSlotCWndVPos + 2, (600 - m_nGameHeight) / 2 - 427 - 20 + QuickSlotY); //lea edi,[eax-427]
+	Memory::WriteInt(dwQuickSlotCWndHPos + 2, -815 - QuickSlotX); //lea ebx,[eax-647]
 
 	//Memory::WriteInt(dwByteAvatarMegaHPos + 1, m_nGameWidth + 100); //push 800 ; CAvatarMegaphone::ByeAvatarMegaphone ; IWzVector2D::RelMove ##BAK
 	Memory::WriteInt(dwByteAvatarMegaHPos + 1, m_nGameWidth); //push 800 ; CAvatarMegaphone::ByeAvatarMegaphone ; IWzVector2D::RelMove

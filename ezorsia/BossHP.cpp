@@ -13,6 +13,8 @@ const DWORD dwCUserLocal__Update = 0x0094A144;
 
 char BossHP::aBossHpUIToolTip[1304];
 double BossHP::dBossHpPercentage = 0;
+bool BossHP::Enabled = true;
+int BossHP::PercentOffsetY = 37;
 
 void BossHP::Hook() { // main method
 	HookInternal();
@@ -82,7 +84,7 @@ void BossHP::DrawBossHpNumberIfNeed() {
 	if (dBossHpPercentage > 0) {
 		char sToolTip[20];
 		sprintf_s(sToolTip, "%.2f%%", dBossHpPercentage);
-		BossHP::SetToolTip_String((int)&aBossHpUIToolTip, GetMiniMapWidth(), 37, sToolTip);
+		BossHP::SetToolTip_String((int)&aBossHpUIToolTip, GetMiniMapWidth(), PercentOffsetY, sToolTip);
 	}
 }
 

@@ -209,10 +209,14 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="syelog.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="CombatHooks.h" />
+    <ClInclude Include="CombatDamage.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BossHP.cpp" />
     <ClCompile Include="HpMpAlert.cpp" />
+    <ClCompile Include="CombatHooks.cpp" />
+    <ClCompile Include="CombatDamage.cpp" />
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="ijl15.cpp" />
     <ClCompile Include="ZAllocEx.cpp" />

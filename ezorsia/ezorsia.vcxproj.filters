@@ -144,6 +144,12 @@
     <ClInclude Include="HpMpAlert.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CombatHooks.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CombatDamage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="FixIme.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -180,6 +186,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="HpMpAlert.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CombatHooks.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CombatDamage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SelectCharMacFix.cpp">

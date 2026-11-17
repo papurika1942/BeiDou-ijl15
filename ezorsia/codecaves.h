@@ -1,27 +1,75 @@
 #pragma once
+// R41 baseline merge: the three status-bar caves now honour [statusbar].
+// Defaults reproduce the previous hard-coded behaviour exactly:
+//   nStatusBarX = -1     -> keep whatever x the client passed (ebx / 0 / edi)
+//   nStatusBarMove* = 1  -> move the bar by nStatusBarY
+//   nStatusBarChatX/BgX = 0 -> no extra offset
 int nStatusBarY = 0;
+int nStatusBarX = -1;
+int nStatusBarMoveItems = 1;
+int nStatusBarMoveFrame = 1;
+int nStatusBarChatX = 0;
+int nStatusBarBgX = 0;
+// The client's own y constant (0x8CFD55: push 0x16). Used when a move switch
+// is off, so "off" means the untouched client layout, not "y = 0".
+int nStatusBarNativeY = 0x16;
+
 __declspec(naked) void AdjustStatusBar() {
 	__asm {
-		push nStatusBarY
-		push ebx // horizontal position; 0
-		mov ecx, esi
-		jmp dword ptr[dwStatusBarPosRetn]
+		mov  eax, nStatusBarY
+		cmp  dword ptr[nStatusBarMoveItems], 0
+		jne  items_y_ok
+		mov  eax, nStatusBarNativeY
+	items_y_ok:
+		push eax
+		mov  eax, nStatusBarX
+		test eax, eax
+		jns  items_x_ok
+		mov  eax, ebx // horizontal position; 0
+	items_x_ok:
+		push eax
+		mov  ecx, esi
+		jmp  dword ptr[dwStatusBarPosRetn]
 	}
 }
 
 __declspec(naked) void AdjustStatusBarBG() {
 	__asm {
-		push nStatusBarY
+		mov  eax, nStatusBarY
+		cmp  dword ptr[nStatusBarMoveFrame], 0
+		jne  bg_y_ok
+		mov  eax, nStatusBarNativeY
+	bg_y_ok:
+		push eax
 		movsd
-		push 0
-		jmp dword ptr[dwStatusBarBackgroundPosRetn]
+		mov  eax, nStatusBarX
+		test eax, eax
+		jns  bg_x_ok
+		xor  eax, eax
+	bg_x_ok:
+		add  eax, nStatusBarBgX
+		push eax
+		jmp  dword ptr[dwStatusBarBackgroundPosRetn]
 	}
 }
 
 __declspec(naked) void AdjustStatusBarInput() {
 	__asm {
-		push nStatusBarY
-		push edi
+		mov  eax, nStatusBarY
+		cmp  dword ptr[nStatusBarMoveItems], 0
+		jne  in_y_ok
+		mov  eax, nStatusBarNativeY
+	in_y_ok:
+		push eax
+		// eax is caller-saved at this point (the next original instruction is a
+		// call), so it is safe to use as scratch here.
+		mov  eax, nStatusBarX
+		test eax, eax
+		jns  in_x_ok
+		mov  eax, edi
+	in_x_ok:
+		add  eax, nStatusBarChatX
+		push eax
 		lea ecx, [esi + 0x0CD0]
 		jmp dword ptr[dwStatusBarInputPosRetn]
 	}
@@ -995,7 +1043,7 @@ __declspec(naked) void fixMouseWheelHook() {
 	}
 }
 
-// ARRAYS ---- ³¤¼üÅÌ¿ªÊ¼
+// ARRAYS ---- ï¿½ï¿½ï¿½ï¿½ï¿½Ì¿ï¿½Ê¼
 unsigned char Array_aDefaultQKM[] = {
 	42, 0, 0, 0,
 	82, 0, 0, 0,
@@ -1315,7 +1363,7 @@ _declspec(naked) void Restore_Array_Expanded() //Thank you Max
 		ret;
 	}
 }
-// ³¤¼üÅÌ½áÊø
+// ï¿½ï¿½ï¿½ï¿½ï¿½Ì½ï¿½ï¿½ï¿½
 
 
 DWORD fixDateFormatRtnAddr = 0x008EBF65;
@@ -1454,14 +1502,14 @@ __declspec(naked) void chatTextPos()
 		cmp[edi + 0D00h], 2
 		jz label_type2
 
-		label_type1 :        // ×´Ì¬1 ÊÕËõ
+		label_type1 :        // ×´Ì¬1 ï¿½ï¿½ï¿½ï¿½
 		sub eax, 1
 		jmp label_rtn
 
-		label_type2 :        // ×´Ì¬2 ÊÕËõ + ÊäÈë
+		label_type2 :        // ×´Ì¬2 ï¿½ï¿½ï¿½ï¿½ + ï¿½ï¿½ï¿½ï¿½
 		jmp label_rtn
 
-		label_type3 :        // ×´Ì¬3 Õ¹¿ª
+		label_type3 :        // ×´Ì¬3 Õ¹ï¿½ï¿½
 		sub eax, 2
 
 		label_rtn :
@@ -1594,7 +1642,7 @@ __declspec(naked) void wordMapUIcc()
 	}
 }
 
-/* ÐÞ¸´¼¼ÄÜÃèÊöÖÐÎÄ»»ÐÐÂÒÂëµÄÎÊÌâ */
+/* ï¿½Þ¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ */
 constexpr int kSkillTooltipLineBytes = 55;
 constexpr int kSkillTooltipScanBytes = 60;
 
