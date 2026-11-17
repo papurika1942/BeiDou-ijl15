@@ -253,6 +253,9 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 			// R41 baseline merge: the config keys that already exist in the
 			// upstream source as hard-coded constants. Defaults equal the old
 			// hard-coded values, so an old config.ini keeps working unchanged.
+#if FUSION_TIER >= 41
+			// R41 UI tier: read the 11 UI keys from config. Compiled out below
+			// tier 41 so the statics keep their hard-coded R39 defaults.
 			Client::StatusBarX = reader.GetInteger("statusbar", "StatusBarX", -1);
 			Client::MoveBarFrame = reader.GetBoolean("statusbar", "MoveBarFrame", true);
 			Client::MoveBarItems = reader.GetBoolean("statusbar", "MoveBarItems", true);
@@ -263,6 +266,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 			Client::QuickSlotY = reader.GetInteger("quickslot", "QuickSlotY", 0);
 			BossHP::Enabled = reader.GetBoolean("bosshp", "Enabled", true);
 			BossHP::PercentOffsetY = reader.GetInteger("bosshp", "PercentOffsetY", 37);
+#endif
 		}
 
 		Hook_CreateMutexA(true); //multiclient //ty darter, angel, and alias!
@@ -294,7 +298,13 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 		ApplyNativePatches(g_banFist, g_strengthenSewer, g_unStopAttack, g_unlockSP);
 		std::cout << "[fusion] TIER=42 native patches armed" << std::endl;
 #else
-		std::cout << "[fusion] TIER=" << FUSION_TIER << " native patches COMPILED OUT" << std::endl;
+		std::cout << "[fusion] TIER=" << FUSION_TIER
+#if FUSION_TIER < 41
+			<< " native patches COMPILED OUT + UI tier COMPILED OUT (R39 hard-coded)"
+#else
+			<< " native patches COMPILED OUT, UI tier active"
+#endif
+			<< std::endl;
 #endif
 		HookSelectCharMacFix(true);
 		//Hook_get_unknown(true);
@@ -308,18 +318,26 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 		Client::UpdateResolution();
 		Client::FixMouseWheel();
 		Client::Chinese();
+#if FUSION_TIER >= 41
 		if (Client::EnableLongSlot) {
 			Client::LongQuickSlot();
 		}
+#else
+		Client::LongQuickSlot(); // R39 baseline: unconditional
+#endif
 		Client::FixDateFormat();
 		Client::FixItemType();
 		Client::JumpCap();
 		Client::FixChatPosHook();
 		Client::NoPassword();
 		Client::MoreHook();
+#if FUSION_TIER >= 41
 		if (BossHP::Enabled) {
 			BossHP::Hook();
 		}
+#else
+		BossHP::Hook(); // R39 baseline: unconditional
+#endif
 		Client::WorldMap();
 		Client::RefreshRate(); 
 		Client::DeleteChar();
